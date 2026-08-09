@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+
+{% block title %}User Profile - InterviewPrepAI{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center py-4">
+    <div class="col-md-6 col-lg-5">
+        <div class="card glass-card text-white p-4 shadow-lg">
+            <h3 class="fw-bold mb-3"><i class="bi bi-person-gear text-gradient me-2"></i> Profile Settings</h3>
+
+            <form method="POST" action="{{ url_for('profile.profile') }}">
+                <div class="mb-3">
+                    <label class="form-label text-muted">Full Name</label>
+                    <input type="text" name="name" class="form-control bg-dark text-white border-secondary" value="{{ current_user.name }}" required>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label text-muted">Email Address (Read-only)</label>
+                    <input type="email" class="form-control bg-dark text-muted border-secondary" value="{{ current_user.email }}" readonly>
+                </div>
+
+                <div class="mb-4">
+                    <label class="form-label text-muted">Target Job Role</label>
+                    <select name="target_role_id" class="form-select bg-dark text-white border-secondary">
+                        {% for role in job_roles %}
+                        <option value="{{ role.id }}" {% if current_user.target_role_id == role.id %}selected{% endif %}>{{ role.title }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <button type="submit" class="btn btn-gradient w-100 py-2 fw-bold">Update Profile</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

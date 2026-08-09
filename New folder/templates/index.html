@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+
+{% block title %}Prepare Smarter. Interview Better. - InterviewPrepAI{% endblock %}
+
+{% block content %}
+<div class="hero-section text-center text-white py-5 my-4 position-relative">
+    <div class="hero-bg-overlay"></div>
+    <div class="container position-relative z-1 py-5">
+        <span class="badge bg-light text-primary rounded-pill px-3 py-2 mb-3 fw-bold tracking-wide">
+            <i class="bi bi-stars"></i> NEXT-GEN AI INTERVIEW COACH
+        </span>
+        <h1 class="display-3 fw-bold mb-3 hero-title">Prepare Smarter. <span class="text-gradient">Interview Better.</span></h1>
+        <p class="lead text-light opacity-90 mx-auto max-w-700 mb-5 fs-4">
+            An AI-powered personalized interview preparation platform that analyzes your resume, identifies skill gaps, generates personalized questions, and provides intelligent feedback.
+        </p>
+        <div class="d-flex justify-content-center gap-3">
+            <a href="{{ url_for('auth.register') }}" class="btn btn-gradient btn-lg rounded-pill px-5 shadow-lg">Get Started <i class="bi bi-arrow-right ms-2"></i></a>
+            <a href="{{ url_for('auth.login') }}" class="btn btn-outline-light btn-lg rounded-pill px-5">Login</a>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4 my-5">
+    <div class="col-md-4">
+        <div class="card h-100 feature-card p-4 text-white">
+            <div class="feature-icon mb-3">
+                <i class="bi bi-file-earmark-person fs-2 text-gradient"></i>
+            </div>
+            <h4>Resume Skill Extraction</h4>
+            <p class="text-muted">Upload your PDF resume to automatically parse experiences, education, and extract verified technical skills.</p>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card h-100 feature-card p-4 text-white">
+            <div class="feature-icon mb-3">
+                <i class="bi bi-bounding-box-circles fs-2 text-gradient"></i>
+            </div>
+            <h4>Role Skill Gap Analysis</h4>
+            <p class="text-muted">Compare your current skill set against top industry roles like Machine Learning Engineer, Data Scientist, or Full Stack Developer.</p>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card h-100 feature-card p-4 text-white">
+            <div class="feature-icon mb-3">
+                <i class="bi bi-chat-quote fs-2 text-gradient"></i>
+            </div>
+            <h4>AI Answer Evaluation</h4>
+            <p class="text-muted">Practice real mock interview questions with instant scoring on Technical Accuracy, Relevance, Completeness, and Clarity.</p>
+        </div>
+    </div>
+</div>
+{% endblock %}

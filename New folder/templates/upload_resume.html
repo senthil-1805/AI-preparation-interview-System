@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+
+{% block title %}Upload Resume - InterviewPrepAI{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center py-4">
+    <div class="col-md-8 col-lg-6">
+        <div class="card glass-card text-white p-4 shadow-lg">
+            <h3 class="fw-bold mb-2"><i class="bi bi-file-earmark-pdf-fill text-danger me-2"></i> Upload PDF Resume</h3>
+            <p class="text-muted mb-4">Our NLP parser will extract contact details, experience, education, and technical skills automatically.</p>
+
+            <form method="POST" action="{{ url_for('resume.upload_resume') }}" enctype="multipart/form-data">
+                <div class="mb-4">
+                    <label class="form-label fw-bold">Select Resume PDF (Max 5MB)</label>
+                    <input type="file" name="resume" accept=".pdf" class="form-control bg-dark text-white border-secondary" required>
+                    <div class="form-text text-muted">Only .pdf format is supported.</div>
+                </div>
+
+                <div class="d-flex justify-content-between align-items-center">
+                    <a href="{{ url_for('dashboard.index') }}" class="btn btn-outline-secondary">Cancel</a>
+                    <button type="submit" class="btn btn-gradient px-4 py-2"><i class="bi bi-cpu me-1"></i> Parse & Extract Skills</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

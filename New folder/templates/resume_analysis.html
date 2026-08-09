@@ -1,0 +1,248 @@
+{% extends 'base.html' %}
+
+{% block title %}Resume Structured Analysis - InterviewPrepAI{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4 text-white">
+    <div>
+        <h2 class="fw-bold mb-1"><i class="bi bi-file-earmark-code-fill text-gradient me-2"></i> Resume Analysis & Insights</h2>
+        <p class="text-muted mb-0">Structured profile data extracted automatically from <strong class="text-light">{{ resume.filename }}</strong></p>
+    </div>
+    <div class="d-flex gap-2">
+        <a href="{{ url_for('resume.upload_resume') }}" class="btn btn-outline-light"><i class="bi bi-upload me-1"></i> Upload New Resume</a>
+        <a href="{{ url_for('interview.start_interview') }}" class="btn btn-gradient"><i class="bi bi-play-fill me-1"></i> Start Interview</a>
+    </div>
+</div>
+
+<!-- Quality Score & Completeness Card -->
+<div class="card glass-card text-white p-4 mb-4 shadow-lg">
+    <div class="row align-items-center">
+        <div class="col-md-3 text-center border-end border-secondary">
+            <h6 class="text-muted mb-2">Resume Quality Score</h6>
+            <h1 class="display-4 fw-bold text-gradient mb-0">{{ structured.completeness_score }}%</h1>
+            <small class="text-muted">Completeness Index</small>
+        </div>
+        <div class="col-md-9 ps-md-4">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <h6 class="fw-bold mb-0">Completeness Breakdown</h6>
+                <span class="badge bg-{{ 'success' if structured.completeness_score >= 75 else ('warning' if structured.completeness_score >= 50 else 'danger') }} px-3 py-1">
+                    {{ 'High Quality' if structured.completeness_score >= 75 else ('Moderate Completeness' if structured.completeness_score >= 50 else 'Action Required') }}
+                </span>
+            </div>
+            <div class="progress mb-3" style="height: 14px; background-color: #1e293b;">
+                <div class="progress-bar bg-gradient" style="width: {{ structured.completeness_score }}%;"></div>
+            </div>
+            {% if structured.missing_sections %}
+            <div class="d-flex align-items-center gap-2 flex-wrap">
+                <small class="text-warning fw-bold"><i class="bi bi-exclamation-triangle-fill me-1"></i> Missing Sections:</small>
+                {% for sec in structured.missing_sections %}
+                <span class="badge bg-warning-subtle text-warning border border-warning px-2 py-1">{{ sec }}</span>
+                {% endfor %}
+            </div>
+            {% else %}
+            <small class="text-success"><i class="bi bi-check-circle-fill me-1"></i> All core resume sections detected!</small>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <!-- Left Column: Personal Info & Skills -->
+    <div class="col-lg-4">
+        <!-- Personal Information Card -->
+        <div class="card glass-card text-white p-4 mb-4">
+            <h5 class="fw-bold mb-3 text-primary"><i class="bi bi-person-badge-fill me-2"></i> Personal Information</h5>
+            {% set info = structured.personal_information %}
+            <ul class="list-group list-group-flush bg-transparent">
+                <li class="list-group-item bg-transparent text-white border-secondary px-0 py-2">
+                    <strong class="text-muted d-block">Full Name:</strong>
+                    <span>{{ info.name or 'Not Specified' }}</span>
+                </li>
+                <li class="list-group-item bg-transparent text-white border-secondary px-0 py-2">
+                    <strong class="text-muted d-block">Email:</strong>
+                    <span>{{ info.email or 'Not Specified' }}</span>
+                </li>
+                <li class="list-group-item bg-transparent text-white border-secondary px-0 py-2">
+                    <strong class="text-muted d-block">Phone:</strong>
+                    <span>{{ info.phone or 'Not Specified' }}</span>
+                </li>
+                {% if info.address %}
+                <li class="list-group-item bg-transparent text-white border-secondary px-0 py-2">
+                    <strong class="text-muted d-block">Address:</strong>
+                    <span>{{ info.address }}</span>
+                </li>
+                {% endif %}
+                {% if info.linkedin %}
+                <li class="list-group-item bg-transparent text-white border-secondary px-0 py-2">
+                    <strong class="text-muted d-block">LinkedIn:</strong>
+                    <a href="{{ info.linkedin }}" target="_blank" class="text-info text-decoration-none"><i class="bi bi-linkedin"></i> {{ info.linkedin }}</a>
+                </li>
+                {% endif %}
+                {% if info.github %}
+                <li class="list-group-item bg-transparent text-white border-secondary px-0 py-2">
+                    <strong class="text-muted d-block">GitHub:</strong>
+                    <a href="{{ info.github }}" target="_blank" class="text-info text-decoration-none"><i class="bi bi-github"></i> {{ info.github }}</a>
+                </li>
+                {% endif %}
+                {% if info.portfolio %}
+                <li class="list-group-item bg-transparent text-white border-secondary px-0 py-2">
+                    <strong class="text-muted d-block">Portfolio:</strong>
+                    <a href="{{ info.portfolio }}" target="_blank" class="text-info text-decoration-none"><i class="bi bi-globe"></i> {{ info.portfolio }}</a>
+                </li>
+                {% endif %}
+            </ul>
+        </div>
+
+        <!-- Categorized Skills Card -->
+        <div class="card glass-card text-white p-4">
+            <h5 class="fw-bold mb-3 text-warning"><i class="bi bi-cpu-fill me-2"></i> Categorized Skills</h5>
+            {% set skills = structured.skills %}
+            
+            {% for category, skill_list in skills.items() %}
+                {% if skill_list %}
+                <div class="mb-3">
+                    <small class="text-muted text-uppercase fw-bold tracking-wide d-block mb-2">{{ category|replace('_', ' ') }}</small>
+                    <div class="d-flex flex-wrap gap-1">
+                        {% for sk in skill_list %}
+                        <span class="badge bg-dark border border-secondary px-2 py-1 fs-6 rounded-pill text-light">
+                            {{ sk }}
+                        </span>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+            {% else %}
+            <p class="text-muted">No categorized skills extracted.</p>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Right Column: Profile, Work Experience, Education, Projects, Certifications -->
+    <div class="col-lg-8">
+        <!-- Professional Profile / Summary -->
+        {% if structured.profile %}
+        <div class="card glass-card text-white p-4 mb-4">
+            <h5 class="fw-bold mb-2 text-info"><i class="bi bi-card-text me-2"></i> Professional Summary</h5>
+            <p class="text-light opacity-90 mb-0 leading-relaxed">{{ structured.profile }}</p>
+        </div>
+        {% endif %}
+
+        <!-- Work Experience -->
+        <div class="card glass-card text-white p-4 mb-4">
+            <h5 class="fw-bold mb-3 text-success"><i class="bi bi-briefcase-fill me-2"></i> Work Experience ({{ structured.experience|length }})</h5>
+            {% if structured.experience %}
+                {% for exp in structured.experience %}
+                <div class="mb-4 pb-3 border-bottom border-secondary last-border-0">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <h5 class="fw-bold mb-1 text-white">{{ exp.job_title }}</h5>
+                            <h6 class="text-info mb-1"><i class="bi bi-building me-1"></i> {{ exp.company }}</h6>
+                        </div>
+                        <span class="badge bg-secondary px-3 py-1">
+                            {{ exp.start_date or 'N/A' }} - {{ exp.end_date or 'Present' }}
+                        </span>
+                    </div>
+                    {% if exp.responsibilities %}
+                    <ul class="mt-2 text-muted small ps-3 mb-0">
+                        {% for resp in exp.responsibilities %}
+                        <li class="mb-1">{{ resp }}</li>
+                        {% endfor %}
+                    </ul>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            {% else %}
+            <p class="text-muted mb-0">No work experience entries detected.</p>
+            {% endif %}
+        </div>
+
+        <!-- Projects -->
+        <div class="card glass-card text-white p-4 mb-4">
+            <h5 class="fw-bold mb-3 text-gradient"><i class="bi bi-code-slash me-2"></i> Projects ({{ structured.projects|length }})</h5>
+            {% if structured.projects %}
+                {% for proj in structured.projects %}
+                <div class="mb-3 p-3 bg-dark border border-secondary rounded-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h6 class="fw-bold mb-1 text-white">{{ proj.name }}</h6>
+                        {% if proj.url %}
+                        <a href="{{ proj.url }}" target="_blank" class="btn btn-sm btn-outline-info py-0 px-2"><i class="bi bi-link-45deg"></i> URL</a>
+                        {% endif %}
+                    </div>
+                    {% if proj.description %}
+                    <p class="text-muted small mb-2">{{ proj.description }}</p>
+                    {% endif %}
+                    {% if proj.technologies %}
+                    <div class="d-flex flex-wrap gap-1">
+                        {% for tech in proj.technologies %}
+                        <span class="badge bg-secondary py-1 px-2 text-white">{{ tech }}</span>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            {% else %}
+            <p class="text-muted mb-0">No projects detected.</p>
+            {% endif %}
+        </div>
+
+        <!-- Education -->
+        <div class="card glass-card text-white p-4 mb-4">
+            <h5 class="fw-bold mb-3 text-primary"><i class="bi bi-mortarboard-fill me-2"></i> Education ({{ structured.education|length }})</h5>
+            {% if structured.education %}
+                {% for edu in structured.education %}
+                <div class="mb-3 d-flex justify-content-between align-items-center pb-2 border-bottom border-secondary last-border-0">
+                    <div>
+                        <h6 class="fw-bold mb-1 text-white">{{ edu.degree }} {% if edu.field %}in {{ edu.field }}{% endif %}</h6>
+                        <small class="text-muted"><i class="bi bi-geo-alt me-1"></i> {{ edu.institution }}</small>
+                    </div>
+                    <div class="text-end">
+                        <span class="badge bg-secondary px-3 py-1">{{ edu.start_year }} - {{ edu.end_year }}</span>
+                        {% if edu.gpa %}
+                        <small class="d-block text-warning fw-bold mt-1">{{ edu.gpa }}</small>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+            <p class="text-muted mb-0">No education entries detected.</p>
+            {% endif %}
+        </div>
+
+        <!-- Certifications & Languages & Achievements -->
+        <div class="row g-3">
+            <div class="col-md-6">
+                <div class="card glass-card text-white p-3 h-100">
+                    <h6 class="fw-bold mb-2 text-warning"><i class="bi bi-award-fill me-2"></i> Certifications ({{ structured.certifications|length }})</h6>
+                    {% if structured.certifications %}
+                    <ul class="list-unstyled mb-0 small">
+                        {% for cert in structured.certifications %}
+                        <li class="mb-2 border-bottom border-secondary pb-1">
+                            <strong class="text-light">{{ cert.name }}</strong>
+                            <span class="badge bg-dark border border-secondary text-muted ms-1">{{ cert.issuing_organization }}</span>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                    {% else %}
+                    <p class="text-muted small mb-0">No certifications listed.</p>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card glass-card text-white p-3 h-100">
+                    <h6 class="fw-bold mb-2 text-info"><i class="bi bi-translate me-2"></i> Languages ({{ structured.languages|length }})</h6>
+                    {% if structured.languages %}
+                    <div class="d-flex flex-wrap gap-1">
+                        {% for lang in structured.languages %}
+                        <span class="badge bg-dark border border-secondary px-2 py-1 text-light">{{ lang.language }}</span>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <p class="text-muted small mb-0">No language preferences extracted.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+{% endblock %}

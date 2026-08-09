@@ -1,0 +1,262 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard - InterviewPrepAI{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4 text-white">
+    <div>
+        <h2 class="fw-bold mb-1">Welcome, {{ current_user.name }} 👋</h2>
+        <p class="text-muted mb-0">Target Role: <span class="badge bg-primary px-3 py-1 fs-6">{{ target_role.title if target_role else 'Not Set' }}</span></p>
+    </div>
+    <div class="d-flex gap-2">
+        <a href="{{ url_for('resume.upload_resume') }}" class="btn btn-outline-light"><i class="bi bi-upload me-1"></i> Upload Resume</a>
+        <a href="{{ url_for('interview.start_interview') }}" class="btn btn-gradient"><i class="bi bi-play-fill me-1"></i> Start Mock Interview</a>
+    </div>
+</div>
+
+<!-- Resume Structured Overview Banner -->
+{% if latest_resume %}
+<div class="card glass-card text-white p-3 mb-4 border-info">
+    <div class="row align-items-center">
+        <div class="col-md-3">
+            <h6 class="text-muted mb-1"><i class="bi bi-file-earmark-code text-info me-1"></i> Resume Completeness</h6>
+            <h4 class="fw-bold text-gradient mb-0">{{ completeness_score }}%</h4>
+        </div>
+        <div class="col-md-9 border-start border-secondary ps-md-4">
+            <div class="d-flex justify-content-between flex-wrap gap-3 text-center">
+                <div>
+                    <span class="text-muted d-block small">Extracted Skills</span>
+                    <strong class="fs-5 text-warning">{{ user_skills|length }}</strong>
+                </div>
+                <div>
+                    <span class="text-muted d-block small">Work Experience</span>
+                    <strong class="fs-5 text-success">{{ experience_count }}</strong>
+                </div>
+                <div>
+                    <span class="text-muted d-block small">Projects</span>
+                    <strong class="fs-5 text-info">{{ projects_count }}</strong>
+                </div>
+                <div>
+                    <span class="text-muted d-block small">Education</span>
+                    <strong class="fs-5 text-primary">{{ education_count }}</strong>
+                </div>
+                <div>
+                    <span class="text-muted d-block small">Certifications</span>
+                    <strong class="fs-5 text-light">{{ certifications_count }}</strong>
+                </div>
+                <div class="align-self-center ms-auto">
+                    <a href="{{ url_for('resume.resume_analysis') }}" class="btn btn-sm btn-outline-info">View Analysis <i class="bi bi-arrow-right"></i></a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- Stat Cards -->
+<div class="row g-3 mb-4">
+    <div class="col-md-3">
+        <div class="card glass-card text-white p-3 h-100">
+            <div class="d-flex align-items-center">
+                <div class="stat-icon bg-primary-subtle text-primary p-3 rounded-circle me-3">
+                    <i class="bi bi-file-earmark-check-fill fs-3"></i>
+                </div>
+                <div>
+                    <h6 class="text-muted mb-1">Resume Status</h6>
+                    <h5 class="fw-bold mb-0">
+                        {% if latest_resume %}
+                            <span class="text-success"><i class="bi bi-check-circle-fill"></i> Uploaded</span>
+                        {% else %}
+                            <span class="text-warning"><i class="bi bi-exclamation-triangle-fill"></i> Missing</span>
+                        {% endif %}
+                    </h5>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card glass-card text-white p-3 h-100">
+            <div class="d-flex align-items-center">
+                <div class="stat-icon bg-info-subtle text-info p-3 rounded-circle me-3">
+                    <i class="bi bi-pie-chart-fill fs-3"></i>
+                </div>
+                <div>
+                    <h6 class="text-muted mb-1">Skill Coverage</h6>
+                    <h4 class="fw-bold mb-0 text-info">{{ gap_result.coverage_pct }}%</h4>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card glass-card text-white p-3 h-100">
+            <div class="d-flex align-items-center">
+                <div class="stat-icon bg-warning-subtle text-warning p-3 rounded-circle me-3">
+                    <i class="bi bi-camera-video-fill fs-3"></i>
+                </div>
+                <div>
+                    <h6 class="text-muted mb-1">Total Interviews</h6>
+                    <h4 class="fw-bold mb-0">{{ total_interviews }}</h4>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card glass-card text-white p-3 h-100">
+            <div class="d-flex align-items-center">
+                <div class="stat-icon bg-success-subtle text-success p-3 rounded-circle me-3">
+                    <i class="bi bi-trophy-fill fs-3"></i>
+                </div>
+                <div>
+                    <h6 class="text-muted mb-1">Best Score</h6>
+                    <h4 class="fw-bold mb-0 text-success">{{ best_score }}%</h4>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Charts Row -->
+<div class="row g-4 mb-4">
+    <div class="col-lg-8">
+        <div class="card glass-card text-white p-4 h-100">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="fw-bold mb-0"><i class="bi bi-graph-up text-primary me-2"></i> Interview Performance Trend</h5>
+                <small class="text-muted">Average: {{ avg_score }}%</small>
+            </div>
+            <div style="height: 260px;">
+                <canvas id="scoreTrendChart"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-4">
+        <div class="card glass-card text-white p-4 h-100">
+            <h5 class="fw-bold mb-3"><i class="bi bi-donut-chart text-info me-2"></i> Skill Coverage Breakdown</h5>
+            <div style="height: 220px;" class="d-flex justify-content-center">
+                <canvas id="skillCoverageChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Bottom Section: Recent Interviews & Recommendations -->
+<div class="row g-4">
+    <div class="col-lg-7">
+        <div class="card glass-card text-white p-4">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="fw-bold mb-0"><i class="bi bi-clock-history me-2 text-warning"></i> Recent Mock Interviews</h5>
+                <a href="{{ url_for('interview.start_interview') }}" class="btn btn-sm btn-gradient">New Session</a>
+            </div>
+            {% if recent_interviews %}
+            <div class="table-responsive">
+                <table class="table table-dark table-hover align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Role</th>
+                            <th>Score</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for inv in recent_interviews %}
+                        <tr>
+                            <td>{{ inv.created_at.strftime("%b %d, %Y") }}</td>
+                            <td>{{ inv.job_role.title }}</td>
+                            <td>
+                                <span class="fw-bold text-{{ 'success' if inv.scores.overall_score >= 80 else ('warning' if inv.scores.overall_score >= 60 else 'danger') }}">
+                                    {{ inv.scores.overall_score }}%
+                                </span>
+                            </td>
+                            <td><span class="badge bg-secondary">{{ inv.scores.status }}</span></td>
+                            <td>
+                                <a href="{{ url_for('interview.view_report', interview_id=inv.id) }}" class="btn btn-sm btn-outline-light">
+                                    <i class="bi bi-eye"></i> Report
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <p class="text-muted my-3 text-center">No mock interviews completed yet. Click <strong>New Session</strong> to begin!</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="col-lg-5">
+        <div class="card glass-card text-white p-4">
+            <h5 class="fw-bold mb-3"><i class="bi bi-lightbulb-fill text-warning me-2"></i> Targeted Recommendations</h5>
+            {% if recommendations %}
+                <ul class="list-group list-group-flush bg-transparent">
+                {% for rec in recommendations %}
+                    <li class="list-group-item bg-transparent text-white border-secondary px-0">
+                        <div class="fw-bold text-warning">{{ rec.topic }}</div>
+                        <small class="text-muted">{{ rec.action_item }}</small>
+                    </li>
+                {% endfor %}
+                </ul>
+            {% else %}
+                <p class="text-muted my-3">Complete a mock interview to generate personalized AI recommendations.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        // Score Trend Chart
+        const trendCtx = document.getElementById('scoreTrendChart').getContext('2d');
+        new Chart(trendCtx, {
+            type: 'line',
+            data: {
+                labels: {{ score_trend_labels | tojson }},
+                datasets: [{
+                    label: 'Overall Score (%)',
+                    data: {{ score_trend_data | tojson }},
+                    borderColor: '#6366f1',
+                    backgroundColor: 'rgba(99, 102, 241, 0.2)',
+                    fill: true,
+                    tension: 0.4,
+                    borderWidth: 3,
+                    pointRadius: 5,
+                    pointBackgroundColor: '#818cf8'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    y: { min: 0, max: 100, grid: { color: '#334155' }, ticks: { color: '#94a3b8' } },
+                    x: { grid: { color: '#334155' }, ticks: { color: '#94a3b8' } }
+                }
+            }
+        });
+
+        // Skill Coverage Pie Chart
+        const skillCtx = document.getElementById('skillCoverageChart').getContext('2d');
+        new Chart(skillCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Matching Skills', 'Missing Skills'],
+                datasets: [{
+                    data: [{{ skill_coverage_chart.matching }}, {{ skill_coverage_chart.missing }}],
+                    backgroundColor: ['#10b981', '#f59e0b'],
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'bottom', labels: { color: '#f8fafc' } }
+                }
+            }
+        });
+    });
+</script>
+{% endblock %}

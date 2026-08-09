@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+
+{% block title %}Skill Gap Analysis - InterviewPrepAI{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4 text-white">
+    <div>
+        <h2 class="fw-bold mb-1"><i class="bi bi-diagram-3-fill text-gradient me-2"></i> Skill Gap Analysis</h2>
+        <p class="text-muted mb-0">Role: <span class="badge bg-primary px-3 py-1 fs-6">{{ target_role.title if target_role else 'Not Selected' }}</span></p>
+    </div>
+    <a href="{{ url_for('interview.start_interview') }}" class="btn btn-gradient"><i class="bi bi-play-fill me-1"></i> Start Practice Interview</a>
+</div>
+
+<!-- Coverage Banner -->
+<div class="card glass-card text-white p-4 mb-4">
+    <div class="d-flex justify-content-between align-items-center mb-2">
+        <h5 class="fw-bold mb-0">Role Skill Coverage</h5>
+        <span class="fs-4 fw-bold text-gradient">{{ analysis.coverage_pct }}%</span>
+    </div>
+    <div class="progress" style="height: 18px; background-color: #1e293b;">
+        <div class="progress-bar bg-gradient" role="progressbar" style="width: {{ analysis.coverage_pct }}%;" aria-valuenow="{{ analysis.coverage_pct }}" aria-valuemin="0" aria-valuemax="100">
+            {{ analysis.coverage_pct }}%
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <!-- Matching Skills -->
+    <div class="col-md-6">
+        <div class="card glass-card text-white p-4 h-100">
+            <h5 class="fw-bold mb-3 text-success"><i class="bi bi-check-circle-fill me-2"></i> Matching Skills ({{ analysis.matching_skills|length }})</h5>
+            <div class="d-flex flex-wrap gap-2">
+                {% for skill in analysis.matching_skills %}
+                <span class="badge bg-success-subtle text-success border border-success px-3 py-2 fs-6 rounded-pill">
+                    ✓ {{ skill }}
+                </span>
+                {% else %}
+                <p class="text-muted">No matching skills found for this job role yet.</p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Missing Skills -->
+    <div class="col-md-6">
+        <div class="card glass-card text-white p-4 h-100">
+            <h5 class="fw-bold mb-3 text-warning"><i class="bi bi-x-circle-fill me-2"></i> Missing Skills ({{ analysis.missing_skills|length }})</h5>
+            <div class="d-flex flex-wrap gap-2">
+                {% for skill in analysis.missing_skills %}
+                <span class="badge bg-warning-subtle text-warning border border-warning px-3 py-2 fs-6 rounded-pill">
+                    ✗ {{ skill }}
+                </span>
+                {% else %}
+                <p class="text-success fw-bold">Great job! You possess all required skills for this role.</p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

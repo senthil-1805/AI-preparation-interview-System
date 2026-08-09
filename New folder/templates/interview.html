@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+
+{% block title %}Mock Interview Session - InterviewPrepAI{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center py-3">
+    <div class="col-lg-9">
+        <form method="POST" action="{{ url_for('interview.conduct_interview', interview_id=interview.id) }}" id="interviewForm">
+            <div class="d-flex justify-content-between align-items-center mb-3 text-white">
+                <h4 class="fw-bold mb-0"><i class="bi bi-camera-video-fill text-danger me-2"></i> {{ interview.job_role.title }} Interview</h4>
+                <span class="badge bg-gradient px-3 py-2 fs-6">Session ID: #{{ interview.id }}</span>
+            </div>
+
+            <!-- Question Cards Carousel / Step View -->
+            {% for ans in answers %}
+            <div class="card glass-card text-white p-4 mb-4 question-card" id="question_step_{{ loop.index }}" style="{% if not loop.first %}display: none;{% endif %}">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <span class="badge bg-secondary px-3 py-2">Question {{ loop.index }} of {{ answers|length }}</span>
+                    <div>
+                        <span class="badge bg-primary me-1">{{ ans.question.category }}</span>
+                        <span class="badge bg-warning text-dark">{{ ans.question.difficulty }}</span>
+                    </div>
+                </div>
+
+                <h4 class="fw-bold mb-4 question-text">{{ ans.question.text }}</h4>
+
+                <div class="mb-3">
+                    <label class="form-label text-muted fw-bold">Your Response:</label>
+                    <textarea name="answer_{{ ans.id }}" class="form-control bg-dark text-white border-secondary p-3" rows="6" placeholder="Type your answer clearly with technical details and examples...">{{ ans.user_answer or '' }}</textarea>
+                </div>
+
+                <div class="d-flex justify-content-between align-items-center pt-3 border-top border-secondary">
+                    <button type="button" class="btn btn-outline-secondary px-4" onclick="showStep({{ loop.index - 1 }})" {% if loop.first %}disabled{% endif %}>
+                        <i class="bi bi-arrow-left me-1"></i> Previous
+                    </button>
+                    {% if not loop.last %}
+                    <button type="button" class="btn btn-primary px-4" onclick="showStep({{ loop.index + 1 }})">
+                        Next <i class="bi bi-arrow-right ms-1"></i>
+                    </button>
+                    {% else %}
+                    <button type="submit" class="btn btn-success px-5 py-2 fw-bold shadow-lg">
+                        <i class="bi bi-check-circle-fill me-1"></i> Submit Interview
+                    </button>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    function showStep(stepIndex) {
+        const cards = document.querySelectorAll('.question-card');
+        if (stepIndex < 1 || stepIndex > cards.length) return;
+        cards.forEach((card, idx) => {
+            card.style.display = (idx + 1 === stepIndex) ? 'block' : 'none';
+        });
+    }
+</script>
+{% endblock %}

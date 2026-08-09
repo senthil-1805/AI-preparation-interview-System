@@ -1,0 +1,113 @@
+{% extends 'base.html' %}
+
+{% block title %}Interview Evaluation Report - InterviewPrepAI{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4 text-white">
+    <div>
+        <h2 class="fw-bold mb-1"><i class="bi bi-file-earmark-bar-graph-fill text-gradient me-2"></i> Interview Report</h2>
+        <p class="text-muted mb-0">Role: <span class="badge bg-primary px-3 py-1 fs-6">{{ interview.job_role.title }}</span></p>
+    </div>
+    <div class="d-flex gap-2">
+        <a href="{{ url_for('dashboard.index') }}" class="btn btn-outline-light"><i class="bi bi-speedometer2 me-1"></i> Dashboard</a>
+        <a href="{{ url_for('interview.start_interview') }}" class="btn btn-gradient"><i class="bi bi-arrow-repeat me-1"></i> Practice Again</a>
+    </div>
+</div>
+
+<!-- Score Gauges / Summary Cards -->
+<div class="row g-3 mb-4">
+    <div class="col-md-3">
+        <div class="card glass-card text-white p-3 text-center h-100">
+            <h6 class="text-muted mb-2">Overall Score</h6>
+            <h2 class="fw-bold text-gradient mb-1">{{ score.overall_score }}%</h2>
+            <span class="badge bg-{{ 'success' if score.overall_score >= 80 else 'warning' }} px-3 py-1 mt-1">{{ score.status }}</span>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card glass-card text-white p-3 text-center h-100">
+            <h6 class="text-muted mb-2">Technical Score</h6>
+            <h2 class="fw-bold text-info mb-1">{{ score.technical_score }}%</h2>
+            <div class="progress mt-2" style="height: 6px;"><div class="progress-bar bg-info" style="width: {{ score.technical_score }}%;"></div></div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card glass-card text-white p-3 text-center h-100">
+            <h6 class="text-muted mb-2">Communication Score</h6>
+            <h2 class="fw-bold text-warning mb-1">{{ score.communication_score }}%</h2>
+            <div class="progress mt-2" style="height: 6px;"><div class="progress-bar bg-warning" style="width: {{ score.communication_score }}%;"></div></div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card glass-card text-white p-3 text-center h-100">
+            <h6 class="text-muted mb-2">Relevance Score</h6>
+            <h2 class="fw-bold text-success mb-1">{{ score.relevance_score }}%</h2>
+            <div class="progress mt-2" style="height: 6px;"><div class="progress-bar bg-success" style="width: {{ score.relevance_score }}%;"></div></div>
+        </div>
+    </div>
+</div>
+
+<!-- Recommendations & Weak Areas -->
+<div class="row g-4 mb-4">
+    <div class="col-md-6">
+        <div class="card glass-card text-white p-4 h-100">
+            <h5 class="fw-bold text-warning mb-3"><i class="bi bi-lightbulb-fill me-2"></i> Recommended Focus Topics</h5>
+            <ul class="list-group list-group-flush bg-transparent">
+                {% for rec in recommendations %}
+                <li class="list-group-item bg-transparent text-white border-secondary px-0">
+                    <strong class="text-info">• {{ rec.topic }}</strong>
+                    <p class="text-muted small mb-0 mt-1">{{ rec.action_item }}</p>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card glass-card text-white p-4 h-100">
+            <h5 class="fw-bold text-info mb-3"><i class="bi bi-bar-chart-steps me-2"></i> Strengths & Areas for Improvement</h5>
+            <div class="mb-3">
+                <strong class="text-success"><i class="bi bi-hand-thumbs-up-fill me-1"></i> Key Strengths:</strong>
+                <p class="text-muted small mt-1">{{ score.strengths }}</p>
+            </div>
+            <div>
+                <strong class="text-warning"><i class="bi bi-exclamation-triangle-fill me-1"></i> Growth Opportunities:</strong>
+                <p class="text-muted small mt-1">{{ score.weak_areas }}</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Question Breakdown -->
+<div class="card glass-card text-white p-4">
+    <h5 class="fw-bold mb-4"><i class="bi bi-list-check text-primary me-2"></i> Detailed Question Feedback</h5>
+    <div class="accordion accordion-flush bg-transparent" id="feedbackAccordion">
+        {% for ans in answers %}
+        <div class="accordion-item bg-transparent border-secondary mb-3 rounded-3 overflow-hidden">
+            <h2 class="accordion-header" id="heading{{ ans.id }}">
+                <button class="accordion-button bg-dark text-white collapsed fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ ans.id }}">
+                    <span class="badge bg-gradient me-2">Q{{ loop.index }}</span> {{ ans.question.text }}
+                    <span class="ms-auto badge bg-{{ 'success' if ans.overall_score >= 80 else 'warning' }} me-3">{{ ans.overall_score }}%</span>
+                </button>
+            </h2>
+            <div id="collapse{{ ans.id }}" class="accordion-collapse collapse" data-bs-parent="#feedbackAccordion">
+                <div class="accordion-body bg-dark text-white p-4 border-top border-secondary">
+                    <div class="mb-3">
+                        <strong class="text-muted d-block mb-1">Your Submitted Answer:</strong>
+                        <p class="p-3 bg-secondary-subtle rounded text-light">{{ ans.user_answer or 'No response provided.' }}</p>
+                    </div>
+                    <div class="mb-3">
+                        <strong class="text-muted d-block mb-1">Sample Reference Answer:</strong>
+                        <p class="p-3 bg-dark border border-secondary rounded text-muted small">{{ ans.question.sample_answer or 'N/A' }}</p>
+                    </div>
+                    <div>
+                        <strong class="text-info d-block mb-1">AI Evaluator Feedback:</strong>
+                        <div class="alert alert-info border-0 mb-0">
+                            {{ ans.feedback }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
